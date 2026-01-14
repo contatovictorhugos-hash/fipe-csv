@@ -1,6 +1,7 @@
 package br.com.fipe_csv.service;
 
 import br.com.fipe_csv.DTO.DadosDTO;
+import br.com.fipe_csv.DTO.DetalhesDTO;
 import br.com.fipe_csv.client.Client;
 import org.springframework.stereotype.Service;
 
@@ -19,43 +20,36 @@ public class FipeService {
 
     public byte[] consultar(String tipo, String marca, String modelo, boolean anos) {
 
-        // 1️⃣ Nenhum filtro → marcas
+        // Nenhum filtro - marcas
         if (marca == null) {
             List<DadosDTO> marcas = client.buscarDados(tipo);
 
-            marcas.forEach(m ->
-                    System.out.println("Código: " + m.codigo() + " | Nome: " + m.nome())
-            );
-
             return csvService.marcasToCsv(marcas);
-        }else if (modelo == null) { // 2️⃣ Marca sem modelo → modelos
+
+        }else if (modelo == null) { // Marca sem modelo - modelos
             String codigoMarca = resolverCodigoMarca(tipo, marca);
             List<DadosDTO> modelos = client.buscarModelos(tipo, codigoMarca);
 
-            modelos.forEach(m ->
-                    System.out.println("Código: " + m.codigo() + " | Nome: " + m.nome())
-            );
-
             return csvService.modelosToCsv(modelos);
-        } else if (marca != null && modelo != null && !anos) { // 3️⃣ Marca + modelo → anos
+
+        } else if (!anos) { // - Marca + modelo - anos
             String codigoMarca = resolverCodigoMarca(tipo, marca);
             String codigoModelo = resolverCodigoModelo(tipo, codigoMarca, modelo);
 
             List<DadosDTO> anosList = client.buscarAnos(tipo, codigoMarca, codigoModelo);
 
-            anosList.forEach(m ->
-                    System.out.println("Código: " + m.codigo() + " | Nome: " + m.nome())
-            );
-
             return csvService.anosToCsv(anosList);
-        }
-        else
-            throw new IllegalArgumentException("Parâmetros inválidos");
-    }
 
-    // -------------------------
-    // Métodos auxiliares
-    // -------------------------
+        }
+        else {
+
+            String codigoMarca = resolverCodigoMarca(tipo, marca);
+            String codigoModelo = resolverCodigoModelo(tipo, codigoMarca, modelo);
+
+            List<DetalhesDTO> detalhes = client.buscarDetalhesPorAno(tipo, codigoMarca, codigoModelo);
+            return csvService.gerarCsvDatalhes(detalhes);
+        }
+    }
 
     private String resolverCodigoMarca(String tipo, String marca) {
         return client.buscarDados(tipo).stream()
@@ -84,4 +78,5 @@ public class FipeService {
                         new IllegalArgumentException("Modelo não encontrado"))
                 .codigo();
     }
+
 }
