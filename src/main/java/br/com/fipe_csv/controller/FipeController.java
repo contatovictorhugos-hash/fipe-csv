@@ -5,6 +5,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @RestController
 @RequestMapping("/fipe")
 public class FipeController {
@@ -24,9 +27,14 @@ public class FipeController {
     ) {
         byte[] csv = service.consultar(tipo, marca, modelo, anos);
 
+        String dataHora = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        String filename = "fipe_" + dataHora + ".csv";
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=fipe.csv")
+                        "attachment; filename="+filename)
                 .body(csv);
     }
 }

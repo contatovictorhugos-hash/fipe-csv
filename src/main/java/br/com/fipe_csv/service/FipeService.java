@@ -28,10 +28,7 @@ public class FipeService {
             );
 
             return csvService.marcasToCsv(marcas);
-        }
-
-        // 2️⃣ Marca sem modelo → modelos
-        if (modelo == null) {
+        }else if (modelo == null) { // 2️⃣ Marca sem modelo → modelos
             String codigoMarca = resolverCodigoMarca(tipo, marca);
             List<DadosDTO> modelos = client.buscarModelos(tipo, codigoMarca);
 
@@ -40,19 +37,20 @@ public class FipeService {
             );
 
             return csvService.modelosToCsv(modelos);
+        } else if (marca != null && modelo != null && !anos) { // 3️⃣ Marca + modelo → anos
+            String codigoMarca = resolverCodigoMarca(tipo, marca);
+            String codigoModelo = resolverCodigoModelo(tipo, codigoMarca, modelo);
+
+            List<DadosDTO> anosList = client.buscarAnos(tipo, codigoMarca, codigoModelo);
+
+            anosList.forEach(m ->
+                    System.out.println("Código: " + m.codigo() + " | Nome: " + m.nome())
+            );
+
+            return csvService.anosToCsv(anosList);
         }
-
-        // 3️⃣ Marca + modelo → anos
-        String codigoMarca = resolverCodigoMarca(tipo, marca);
-        String codigoModelo = resolverCodigoModelo(tipo, codigoMarca, modelo);
-
-        List<DadosDTO> anosList = client.buscarAnos(tipo, codigoMarca, codigoModelo);
-
-        anosList.forEach(m ->
-                System.out.println("Código: " + m.codigo() + " | Nome: " + m.nome())
-        );
-
-        return csvService.anosToCsv(anosList);
+        else
+            throw new IllegalArgumentException("Parâmetros inválidos");
     }
 
     // -------------------------
