@@ -3,7 +3,6 @@ package br.com.fipe_csv.client;
 import br.com.fipe_csv.DTO.DadosDTO;
 import br.com.fipe_csv.DTO.DetalhesDTO;
 import br.com.fipe_csv.DTO.ModelosResponse;
-import br.com.fipe_csv.webClientConfig.WebClientConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
