@@ -4,6 +4,7 @@ import br.com.fipe_csv.DTO.DadosDTO;
 import br.com.fipe_csv.DTO.DetalhesDTO;
 import br.com.fipe_csv.DTO.ModelosResponse;
 import br.com.fipe_csv.webClientConfig.WebClientConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -19,6 +20,7 @@ public class Client {
         this.webClient = webClient;
     }
 
+    @Cacheable("marcas")
     public List<DadosDTO> buscarDados(String tipoVeiculo) {
         return webClient.get()
                 .uri("/{tipo}/marcas", tipoVeiculo)
@@ -28,6 +30,7 @@ public class Client {
                 .block();
     }
 
+    @Cacheable(value = "modelos", key = "#tipo + '-' + #codigoMarca")
     public List<DadosDTO> buscarModelos(String tipo, String codigoMarca) {
         return webClient.get()
                 .uri("/{tipo}/marcas/{marca}/modelos", tipo, codigoMarca)
