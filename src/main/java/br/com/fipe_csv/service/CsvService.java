@@ -48,10 +48,10 @@ public class CsvService {
 
         for (DetalhesDTO d : dados) {
             csv.append(escape(d.codigoFipe())).append(",")
-                    .append(escape(d.valor())).append(",")
-                    .append(escape(d.marca())).append(",")
                     .append(escape(d.modelo())).append(",")
                     .append(escape(d.anoModelo())).append(",")
+                    .append(escape(d.valor())).append(",")
+                    .append(escape(d.marca())).append(",")
                     .append(escape(d.combustivel())).append(",")
                     .append(escape(d.mesReferencia()))
                     .append("\n");
