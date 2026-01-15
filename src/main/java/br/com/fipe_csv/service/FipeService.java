@@ -51,16 +51,30 @@ public class FipeService {
         }
     }
 
-    private String resolverCodigoMarca(String tipo, String marca) {
+    private String resolverCodigoMarca(
+            String tipo,
+            String marca
+    ) {
+        String busca = marca.toLowerCase();
+
         return client.buscarDados(tipo).stream()
-                .filter(m ->
-                        m.nome().equalsIgnoreCase(marca) ||
-                                m.codigo().equals(marca)
+                // ordena pelos nomes mais parecidos primeiro
+                .sorted((m1, m2) ->
+                        score(m2.nome(), busca) - score(m1.nome(), busca)
                 )
+
+                // aceita código exato OU nome parecido (like)
+                .filter(m ->
+                        m.codigo().equals(marca) ||
+                                m.nome().toLowerCase().contains(busca)
+                )
+
+                // pega o primeiro da lista ordenada
                 .findFirst()
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Marca não encontrada"))
-                .codigo();
+                        new IllegalArgumentException("Marca não encontrado: " + marca)
+                )
+                .codigo(); // pega o código do marca
     }
 
     private String resolverCodigoModelo(
@@ -68,15 +82,48 @@ public class FipeService {
             String codigoMarca,
             String modelo
     ) {
+        String busca = modelo.toLowerCase();
+
         return client.buscarModelos(tipo, codigoMarca).stream()
-                .filter(m ->
-                        m.nome().equalsIgnoreCase(modelo) ||
-                                m.codigo().equals(modelo)
+
+                // ordena pelos nomes mais parecidos primeiro
+                .sorted((m1, m2) ->
+                        score(m2.nome(), busca) - score(m1.nome(), busca)
                 )
+
+                // aceita código exato OU nome parecido (like)
+                .filter(m ->
+                        m.codigo().equals(modelo) ||
+                                m.nome().toLowerCase().contains(busca)
+                )
+
+                // pega o primeiro da lista ordenada
                 .findFirst()
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Modelo não encontrado"))
-                .codigo();
+                        new IllegalArgumentException("Modelo não encontrado: " + modelo)
+                )
+                .codigo(); // pega o código do modelo
     }
+
+    // método para ordenar
+    private int score(String nome, String busca) {
+        nome = nome.toLowerCase();
+        busca = busca.toLowerCase();
+
+        if (nome.equals(busca)) {
+            return 100;
+        }
+
+        if (nome.startsWith(busca)) {
+            return 80;
+        }
+
+        if (nome.contains(busca)) {
+            return 50;
+        }
+
+        return 0;
+    }
+
 
 }
